@@ -7,6 +7,7 @@ const http = require("http");
 const fs   = require("fs");
 const path = require("path");
 const { WebSocketServer } = require("ws");
+const { text } = require("stream/consumers");
 
 // -----------------------------------------------------------
 // 1. Servidor HTTP — entrega os arquivos estáticos da pasta /public
@@ -104,6 +105,41 @@ wss.on("connection", (socket)=>{
         username: username,
         color: cor,
       });
+
+      broadcast({
+        tipo: "sistema",
+        texto: `${username} entrou na sala.`,
+        usuarios: listaUsuarios(),
+      });
+    }
+    if(msg.tipo === "mensagem"){
+      const cliente = clientes.get(socket);
+      if(!cliente) return;
+
+      const texto = String(msg.texto).trim().slice(0, 500);
+      if(!texto) return;
+
+      broadcast({
+        tipo: "mensagem",
+        username: cliente.username,
+        color: cliente.color,
+        texto: texto,
+        hora: new Date().toLocaleTimeString("pt-BR", {
+          hour: "2-digit", minute: "2-digit"
+        }),
+      })
+        socket.on('close', ()=>{
+          const cliente = clientes.get(socket);
+          if(!cliente) return;
+
+          clientes.delete(socket);
+          
+          broadcast({
+            tipo: "sistema",
+            texto: `${cliente.username} saiu da sala`,
+            usuarios: listaUsuarios(),
+          })
+        })
     }
   });
 });
