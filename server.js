@@ -96,6 +96,14 @@ wss.on("connection", (socket)=>{
 
     if(msg.tipo === "entrar"){
       const username = String(msg.username).trim().slice(0, 20);
+      const cor = proximaCor();
+      clientes.set(socket, {username, color: cor});
+
+      enviar(socket, {
+        tipo: "confirmacao",
+        username: username,
+        color: cor,
+      });
     }
   });
 });

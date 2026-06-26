@@ -117,6 +117,21 @@
     const protocol = location.protocol === "https:" ? "wss" : "ws";
     socket = new WebSocket(`${protocol}://${location.host}`);
 
+    socket.addEventListener("open", ()=>{
+      socket.send(JSON.stringify({
+        tipo: "entrar",
+        username: meuUsername,
+      }))
+    });
+
+    socket.addEventListener("message", (evento)=>{
+      const msg = JSON.parse(evento.data);
+      tratarMensagem(msg);
+    });
+
+    socket.addEventListener("close", ()=>{
+      adicionarSistema("Conexão encerrada.");
+    });
   }
   // --------------------------------------------------------
   // 2. TRATAR MENSAGENS RECEBIDAS DO SERVIDOR
