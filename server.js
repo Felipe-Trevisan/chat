@@ -97,6 +97,11 @@ wss.on("connection", (socket)=>{
 
     if(msg.tipo === "entrar"){
       const username = String(msg.username).trim().slice(0, 20);
+      const nomeEmUso =[...clientes.values()].some(c=>c.username.toLowerCase() === username.toLowerCase());
+      if(nomeEmUso || username === ""){
+        enviar(socket, { tipo: "erro", texto: "Nome de Usuário já está em usou"});
+        return;
+      }
       const cor = proximaCor();
       clientes.set(socket, {username, color: cor});
 
